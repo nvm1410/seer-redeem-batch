@@ -85,7 +85,7 @@ async function batchScalar(chainId) {
             { key: 'correctValue', title: 'Correct Payout' },
             { key: 'difference', title: 'Difference' },
 
-        ], Object.values(exportDataGroupByUser).filter(x => (x.wrongValue >= 1e-2 || x.correctValue >= 1e-2) && x.difference > 0))
+        ], Object.values(exportDataGroupByUser).filter(x => (x.wrongValue >= 1e-2 || x.correctValue >= 1e-2) && Math.abs(x.difference) > 0))
     fs.writeFileSync(`./data/csvGroupByUser-${chainId}.csv`, csvGroupByUser)
 }
 batchScalar(100)
