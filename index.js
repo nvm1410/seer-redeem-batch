@@ -49,21 +49,24 @@ async function batchScalar(chainId) {
                         market: market.id,
                         wrongValue: wrongValue[user],
                         correctValue: correctValue[user],
+                        difference: correctValue[user] - wrongValue[user]
                     })
                 }
 
             }
         }
-
     }
+
+
     const csv = parseToCsv(
         [
             { key: 'user', title: 'User' },
             { key: 'market', title: 'Market' },
             { key: 'wrongValue', title: 'Wrong Payout' },
             { key: 'correctValue', title: 'Correct Payout' },
+            { key: 'difference', title: 'Difference' },
 
-        ], exportData)
+        ], exportData.filter(x => x.wrongValue >= 1e-2 || x.correctValue >= 1e-2))
     fs.writeFileSync(`./data/csv-${chainId}.csv`, csv)
 }
 batchScalar(100)
