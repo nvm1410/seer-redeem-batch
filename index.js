@@ -23,7 +23,7 @@ async function batchScalar(chainId) {
             continue
         }
         const realityAnswerInInt = Number(ethers.utils.formatUnits(realityAnswer, 18))
-        
+
         //skip if expected answer is already equal to or higher than upperBound
         const isAlreadyCorrect = realityAnswerInInt >= Number(market.upperBound)
         if (!isBoundInWei && !isAlreadyCorrect) {
@@ -56,7 +56,6 @@ async function batchScalar(chainId) {
             }
         }
     }
-
     const csv = parseToCsv(
         [
             { key: 'user', title: 'User' },
@@ -67,5 +66,26 @@ async function batchScalar(chainId) {
 
         ], exportData.filter(x => x.wrongValue >= 1e-2 || x.correctValue >= 1e-2))
     fs.writeFileSync(`./data/csv-${chainId}.csv`, csv)
+
+    // export data by user
+    const exportDataGroupByUser = exportData.reduce((acc, curr) => {
+        acc[curr.user] = {
+            ...(acc[curr.user] ?? {}),
+            user: curr.user,
+            wrongValue: (acc[curr.user]?.wrongValue ?? 0) + curr.wrongValue,
+            correctValue: (acc[curr.user]?.correctValue ?? 0) + curr.correctValue,
+            difference: (acc[curr.user]?.difference ?? 0) + curr.difference,
+        }
+        return acc
+    }, {})
+    const csvGroupByUser = parseToCsv(
+        [
+            { key: 'user', title: 'User' },
+            { key: 'wrongValue', title: 'Wrong Payout' },
+            { key: 'correctValue', title: 'Correct Payout' },
+            { key: 'difference', title: 'Difference' },
+
+        ], Object.values(exportDataGroupByUser).filter(x => (x.wrongValue >= 1e-2 || x.correctValue >= 1e-2) && x.difference > 0))
+    fs.writeFileSync(`./data/csvGroupByUser-${chainId}.csv`, csvGroupByUser)
 }
 batchScalar(100)
