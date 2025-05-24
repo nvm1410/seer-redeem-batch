@@ -23,10 +23,10 @@ async function batchScalar(chainId) {
             continue
         }
         const realityAnswerInInt = Number(ethers.utils.formatUnits(realityAnswer, 18))
-
-        //skip if expected answer is already out of range
-        const isWrongPayout = (Number(market.upperBound) > realityAnswerInInt) && (Number(market.lowerBound) < realityAnswerInInt)
-        if (!isBoundInWei && isWrongPayout) {
+        
+        //skip if expected answer is already higher than upperBound
+        const isAlreadyCorrect = realityAnswerInInt > market.upperBound
+        if (!isBoundInWei && !isAlreadyCorrect) {
             const wrongPayout = market.payoutNumerators.map(x => Number(x))
             const correctPayout = []
             correctPayout[0] = (Number(market.upperBound) - realityAnswerInInt) / (Number(market.upperBound) - Number(market.lowerBound))
