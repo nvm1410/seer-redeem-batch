@@ -12,19 +12,19 @@ async function batchScalar(chainId) {
     const now = (new Date().getTime()) / 1000
     const resolvedScalarMarkets = markets.filter(market => market.marketType === 'scalar' && market.finalizeTs < now)
     console.log(resolvedScalarMarkets.length)
-    // get all tokens
-    // get token balances before the finalizeTs
-    // const transfers = await getAllTransfers(chainId)
-    // percentage between the right and wrong answer
+
     const exportData = []
     for (const market of resolvedScalarMarkets) {
         const isBoundInWei = BigInt(market.upperBound) > BigInt(1e10)
         const realityAnswer = market.questions[0].question.best_answer
+
+        // skip invalid
         if (realityAnswer === INVALID) {
             continue
         }
         const realityAnswerInInt = Number(ethers.utils.formatUnits(realityAnswer, 18))
 
+        //skip if expected answer is already out of range
         const isWrongPayout = (Number(market.upperBound) > realityAnswerInInt) && (Number(market.lowerBound) < realityAnswerInInt)
         if (!isBoundInWei && isWrongPayout) {
             const wrongPayout = market.payoutNumerators.map(x => Number(x))
@@ -56,7 +56,6 @@ async function batchScalar(chainId) {
             }
         }
     }
-
 
     const csv = parseToCsv(
         [
